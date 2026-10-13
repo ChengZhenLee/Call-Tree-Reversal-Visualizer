@@ -1,0 +1,162 @@
+\documentclass{article}
+\usepackage[landscape,margin=1cm]{geometry}
+\usepackage{tikz}
+\usepackage[export]{adjustbox}
+\usepackage{amsmath}
+\pagestyle{empty}
+\setlength{\parindent}{0pt}
+\begin{document}
+
+\subsection*{Checkpointed: g, s, h \quad Operation cost: 410 \quad Memory cost: 110}
+\adjustbox{max width=\linewidth}{
+\begin{tikzpicture}[
+  x=2.2cm, y=-1.1cm,
+  every node/.style={inner sep=2pt}]
+  \node (n0_0) at (0, 0) {$ \underrightarrow{\mathit{f}} $};
+  \node (n0_1) at (0, 1) {$ \downarrow\overrightarrow{\mathit{g}} $};
+  \node (n0_2) at (0, 2) {$ \overrightarrow{\mathit{h}} $};
+  \node (n0_3) at (1, 1) {$ \downarrow\overrightarrow{\mathit{s}} $};
+  \node (n1_0) at (2, 0) {$ \underleftarrow{\mathit{f}} $};
+  \node (n1_1) at (2, 1) {$ \uparrow\underrightarrow{\mathit{s}} $};
+  \node (n1_2) at (3, 1) {$ \underleftarrow{\mathit{s}} $};
+  \node (n1_3) at (4, 1) {$ \uparrow\underrightarrow{\mathit{g}} $};
+  \node (n1_4) at (4, 2) {$ \downarrow\overrightarrow{\mathit{h}} $};
+  \node (n1_5) at (5, 1) {$ \underleftarrow{\mathit{g}} $};
+  \node (n1_6) at (5, 2) {$ \uparrow\underrightarrow{\mathit{h}} $};
+  \node (n1_7) at (6, 2) {$ \underleftarrow{\mathit{h}} $};
+\end{tikzpicture}
+}
+\bigskip
+
+\subsection*{Checkpointed: g, s \quad Operation cost: 360 \quad Memory cost: 160}
+\adjustbox{max width=\linewidth}{
+\begin{tikzpicture}[
+  x=2.2cm, y=-1.1cm,
+  every node/.style={inner sep=2pt}]
+  \node (n0_0) at (0, 0) {$ \underrightarrow{\mathit{f}} $};
+  \node (n0_1) at (0, 1) {$ \downarrow\overrightarrow{\mathit{g}} $};
+  \node (n0_2) at (0, 2) {$ \overrightarrow{\mathit{h}} $};
+  \node (n0_3) at (1, 1) {$ \downarrow\overrightarrow{\mathit{s}} $};
+  \node (n1_0) at (2, 0) {$ \underleftarrow{\mathit{f}} $};
+  \node (n1_1) at (2, 1) {$ \uparrow\underrightarrow{\mathit{s}} $};
+  \node (n1_2) at (3, 1) {$ \underleftarrow{\mathit{s}} $};
+  \node (n1_3) at (4, 1) {$ \uparrow\underrightarrow{\mathit{g}} $};
+  \node (n1_4) at (4, 2) {$ \underrightarrow{\mathit{h}} $};
+  \node (n1_5) at (5, 1) {$ \underleftarrow{\mathit{g}} $};
+  \node (n1_6) at (5, 2) {$ \underleftarrow{\mathit{h}} $};
+\end{tikzpicture}
+}
+\bigskip
+
+\subsection*{Checkpointed: g, h \quad Operation cost: 390 \quad Memory cost: 110}
+\adjustbox{max width=\linewidth}{
+\begin{tikzpicture}[
+  x=2.2cm, y=-1.1cm,
+  every node/.style={inner sep=2pt}]
+  \node (n0_0) at (0, 0) {$ \underrightarrow{\mathit{f}} $};
+  \node (n0_1) at (0, 1) {$ \downarrow\overrightarrow{\mathit{g}} $};
+  \node (n0_2) at (0, 2) {$ \overrightarrow{\mathit{h}} $};
+  \node (n0_3) at (1, 1) {$ \underrightarrow{\mathit{s}} $};
+  \node (n1_0) at (2, 0) {$ \underleftarrow{\mathit{f}} $};
+  \node (n1_1) at (2, 1) {$ \underleftarrow{\mathit{s}} $};
+  \node (n1_2) at (3, 1) {$ \uparrow\underrightarrow{\mathit{g}} $};
+  \node (n1_3) at (3, 2) {$ \downarrow\overrightarrow{\mathit{h}} $};
+  \node (n1_4) at (4, 1) {$ \underleftarrow{\mathit{g}} $};
+  \node (n1_5) at (4, 2) {$ \uparrow\underrightarrow{\mathit{h}} $};
+  \node (n1_6) at (5, 2) {$ \underleftarrow{\mathit{h}} $};
+\end{tikzpicture}
+}
+\bigskip
+
+\subsection*{Checkpointed: g \quad Operation cost: 340 \quad Memory cost: 160}
+\adjustbox{max width=\linewidth}{
+\begin{tikzpicture}[
+  x=2.2cm, y=-1.1cm,
+  every node/.style={inner sep=2pt}]
+  \node (n0_0) at (0, 0) {$ \underrightarrow{\mathit{f}} $};
+  \node (n0_1) at (0, 1) {$ \downarrow\overrightarrow{\mathit{g}} $};
+  \node (n0_2) at (0, 2) {$ \overrightarrow{\mathit{h}} $};
+  \node (n0_3) at (1, 1) {$ \underrightarrow{\mathit{s}} $};
+  \node (n1_0) at (2, 0) {$ \underleftarrow{\mathit{f}} $};
+  \node (n1_1) at (2, 1) {$ \underleftarrow{\mathit{s}} $};
+  \node (n1_2) at (3, 1) {$ \uparrow\underrightarrow{\mathit{g}} $};
+  \node (n1_3) at (3, 2) {$ \underrightarrow{\mathit{h}} $};
+  \node (n1_4) at (4, 1) {$ \underleftarrow{\mathit{g}} $};
+  \node (n1_5) at (4, 2) {$ \underleftarrow{\mathit{h}} $};
+\end{tikzpicture}
+}
+\bigskip
+
+\subsection*{Checkpointed: s, h \quad Operation cost: 260 \quad Memory cost: 120}
+\adjustbox{max width=\linewidth}{
+\begin{tikzpicture}[
+  x=2.2cm, y=-1.1cm,
+  every node/.style={inner sep=2pt}]
+  \node (n0_0) at (0, 0) {$ \underrightarrow{\mathit{f}} $};
+  \node (n0_1) at (0, 1) {$ \underrightarrow{\mathit{g}} $};
+  \node (n0_2) at (0, 2) {$ \downarrow\overrightarrow{\mathit{h}} $};
+  \node (n0_3) at (1, 1) {$ \downarrow\overrightarrow{\mathit{s}} $};
+  \node (n1_0) at (2, 0) {$ \underleftarrow{\mathit{f}} $};
+  \node (n1_1) at (2, 1) {$ \uparrow\underrightarrow{\mathit{s}} $};
+  \node (n1_2) at (3, 1) {$ \underleftarrow{\mathit{s}} $};
+  \node (n1_3) at (4, 1) {$ \underleftarrow{\mathit{g}} $};
+  \node (n1_4) at (4, 2) {$ \uparrow\underrightarrow{\mathit{h}} $};
+  \node (n1_5) at (5, 2) {$ \underleftarrow{\mathit{h}} $};
+\end{tikzpicture}
+}
+\bigskip
+
+\subsection*{Checkpointed: s \quad Operation cost: 210 \quad Memory cost: 170}
+\adjustbox{max width=\linewidth}{
+\begin{tikzpicture}[
+  x=2.2cm, y=-1.1cm,
+  every node/.style={inner sep=2pt}]
+  \node (n0_0) at (0, 0) {$ \underrightarrow{\mathit{f}} $};
+  \node (n0_1) at (0, 1) {$ \underrightarrow{\mathit{g}} $};
+  \node (n0_2) at (0, 2) {$ \underrightarrow{\mathit{h}} $};
+  \node (n0_3) at (1, 1) {$ \downarrow\overrightarrow{\mathit{s}} $};
+  \node (n1_0) at (2, 0) {$ \underleftarrow{\mathit{f}} $};
+  \node (n1_1) at (2, 1) {$ \uparrow\underrightarrow{\mathit{s}} $};
+  \node (n1_2) at (3, 1) {$ \underleftarrow{\mathit{s}} $};
+  \node (n1_3) at (4, 1) {$ \underleftarrow{\mathit{g}} $};
+  \node (n1_4) at (4, 2) {$ \underleftarrow{\mathit{h}} $};
+\end{tikzpicture}
+}
+\bigskip
+
+\subsection*{Checkpointed: h \quad Operation cost: 240 \quad Memory cost: 140}
+\adjustbox{max width=\linewidth}{
+\begin{tikzpicture}[
+  x=2.2cm, y=-1.1cm,
+  every node/.style={inner sep=2pt}]
+  \node (n0_0) at (0, 0) {$ \underrightarrow{\mathit{f}} $};
+  \node (n0_1) at (0, 1) {$ \underrightarrow{\mathit{g}} $};
+  \node (n0_2) at (0, 2) {$ \downarrow\overrightarrow{\mathit{h}} $};
+  \node (n0_3) at (1, 1) {$ \underrightarrow{\mathit{s}} $};
+  \node (n1_0) at (2, 0) {$ \underleftarrow{\mathit{f}} $};
+  \node (n1_1) at (2, 1) {$ \underleftarrow{\mathit{s}} $};
+  \node (n1_2) at (3, 1) {$ \underleftarrow{\mathit{g}} $};
+  \node (n1_3) at (3, 2) {$ \uparrow\underrightarrow{\mathit{h}} $};
+  \node (n1_4) at (4, 2) {$ \underleftarrow{\mathit{h}} $};
+\end{tikzpicture}
+}
+\bigskip
+
+\subsection*{Checkpointed: none \quad Operation cost: 190 \quad Memory cost: 190}
+\adjustbox{max width=\linewidth}{
+\begin{tikzpicture}[
+  x=2.2cm, y=-1.1cm,
+  every node/.style={inner sep=2pt}]
+  \node (n0_0) at (0, 0) {$ \underrightarrow{\mathit{f}} $};
+  \node (n0_1) at (0, 1) {$ \underrightarrow{\mathit{g}} $};
+  \node (n0_2) at (0, 2) {$ \underrightarrow{\mathit{h}} $};
+  \node (n0_3) at (1, 1) {$ \underrightarrow{\mathit{s}} $};
+  \node (n1_0) at (2, 0) {$ \underleftarrow{\mathit{f}} $};
+  \node (n1_1) at (2, 1) {$ \underleftarrow{\mathit{s}} $};
+  \node (n1_2) at (3, 1) {$ \underleftarrow{\mathit{g}} $};
+  \node (n1_3) at (3, 2) {$ \underleftarrow{\mathit{h}} $};
+\end{tikzpicture}
+}
+\bigskip
+
+\end{document}

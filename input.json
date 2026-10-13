@@ -1,0 +1,23 @@
+{
+    "functions": {
+        "f": {
+            "cost": [10, 10, 0],
+            "children": ["g", "s"]
+        },
+
+        "g": {
+            "cost": [50, 50],
+            "children": ["h"]
+        },
+
+        "s": {
+            "cost": [20],
+            "children": []
+        },
+
+        "h": {
+            "cost": [50],
+            "children": []
+        }
+    }
+}
