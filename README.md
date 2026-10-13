@@ -67,7 +67,7 @@ and the backward pass on the right.
 
 - **Operation cost**: the cost of the whole program plus one re-run of each checkpointed function.
 - **Memory cost**: the maximum amount of memory used at any point in time. This includes any regrow phase due to checkpointing.
-- **Note**: the operation and memory costs of loading and saving input or outputs are not considered.
+- **Note**: the operation and memory costs of loading and saving input or outputs during checkpointing are not considered.
 
 ## Project layout
 
