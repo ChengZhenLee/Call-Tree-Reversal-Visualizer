@@ -1,7 +1,7 @@
 from .classes import ArrowMode
 
-COL_SPACING = "2.2cm"
-ROW_SPACING = "1.1cm"
+COL_SPACING = "1.0cm"
+ROW_SPACING = "1.0cm"
 
 # arrow of a node, decided by its running mode (the first matching mode wins);
 # adjoint arrows go below the name, primal arrows above
