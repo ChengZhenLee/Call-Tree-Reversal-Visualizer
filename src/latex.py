@@ -12,6 +12,9 @@ RUNNING_MODES = {
     ArrowMode.primalBackward:  r"\overleftarrow",
 }
 
+# adjoint forward and backward in one node, below the name
+MERGED_ARROW = r"\underleftrightarrow"
+
 # shown to the left of the name
 MARKERS = {
     ArrowMode.save: r"\downarrow",
@@ -62,10 +65,15 @@ def _layout(root, counter):
 
 def _label(node):
     arrow = r"\overrightarrow"
-    for mode in node.arrowModes:
-        if mode in RUNNING_MODES:
-            arrow = RUNNING_MODES[mode]
-            break
+    # a merged node (reload immediately followed by its reversal) gets a double arrow
+    if (ArrowMode.adjointForward in node.arrowModes
+            and ArrowMode.adjointBackward in node.arrowModes):
+        arrow = MERGED_ARROW
+    else:
+        for mode in node.arrowModes:
+            if mode in RUNNING_MODES:
+                arrow = RUNNING_MODES[mode]
+                break
 
     markers = "".join(MARKERS[m] for m in node.arrowModes if m in MARKERS)
     name = node.name.replace("_", r"\_")

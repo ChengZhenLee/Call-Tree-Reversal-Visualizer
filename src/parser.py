@@ -104,9 +104,16 @@ def generate_backward_tree(curNode):
 
     # Create the children's visual nodes
     for child in funcChildren:
-        if child.checkpoint:
-            children.append(generate_forward_tree(child, primal=False, backward=True))
-        children.append(generate_backward_tree(child))
+        if child.checkpoint and not child.children:
+            merged = visualNode(child)
+            merged.add_arrow_mode(ArrowMode.load)
+            merged.add_arrow_mode(ArrowMode.adjointForward)
+            merged.add_arrow_mode(ArrowMode.adjointBackward)
+            children.append(merged)
+        else:
+            if child.checkpoint:
+                children.append(generate_forward_tree(child, primal=False, backward=True))
+            children.append(generate_backward_tree(child))
 
     backwardNode.add_children(children)
 
