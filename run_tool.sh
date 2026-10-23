@@ -11,4 +11,4 @@ else
     exit 1
 fi
 
-"$PYTHON" main.py && echo "Wrote output.tex"
+"$PYTHON" main.py "$@" && echo "Wrote output.tex"

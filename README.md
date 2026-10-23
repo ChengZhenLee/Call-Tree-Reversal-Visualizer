@@ -26,8 +26,15 @@ LaTeX, but this does not have to be a local install (see Usage).
    - online, with nothing to install: upload or paste `output.tex` into a
      LaTeX editor such as Overleaf.
 
-The tool always reads `input.json` and writes `output.tex` in the folder it
-is run from.
+Options (also accepted by the launchers):
+
+| Flag | Meaning | Default |
+|---|---|---|
+| `-m`, `--mode` | `enumerate`: every combination of checkpoints; `heuristic`: only the result of each greedy heuristic under the memory limit | `enumerate` |
+| `-i`, `--input` | input json file | `input.json` |
+| `-o`, `--output` | output latex file | `output.tex` |
+
+For example: `python main.py --mode heuristic`.
 
 ## Input format
 
@@ -72,12 +79,14 @@ and the backward pass on the right.
 ## Project layout
 
 ```
-main.py             entry point
+main.py             entry point and command line options
 input.json          the call tree
 run_tool.sh/.bat    launchers for Linux/macOS and Windows
 src/
   classes.py        function and visual node classes
   parser.py         reads the json, builds the forward/backward trees
   cost.py           operation and memory cost
+  heuristics.py     greedy checkpointing heuristics
+  modes.py          what to draw: enumerate all or run the heuristics
   latex.py          draws the trees as LaTeX/TikZ
 ```

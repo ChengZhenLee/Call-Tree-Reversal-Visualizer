@@ -19,5 +19,10 @@
             "cost": [50],
             "children": []
         }
+    },
+
+    "limits": {
+        "memory": 120,
+        "runtime": 10000
     }
 }

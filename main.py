@@ -1,14 +1,13 @@
-import sys
+import argparse
 
-from src.cost import calculate_operation_cost, calculate_memory_cost
-from src.latex import latex_header, latex_footer, draw_tree
-from src.parser import (parse_json, parse_functions, permute, perform_checkpointing,
-                        generate_forward_tree, generate_backward_tree)
+from src.latex import latex_header, latex_footer
+from src.modes import MODES
+from src.parser import parse_json, parse_functions
 
 
-def main(inputName="input.json", outputName="output.tex"):
+def main(inputName="input.json", outputName="output.tex", mode="enumerate"):
     # read the input.json file
-    functionsJson = parse_json(inputName)
+    functionsJson, limits = parse_json(inputName)
 
     # parse the loaded data into classes
     nodes, root = parse_functions(functionsJson)
@@ -16,21 +15,9 @@ def main(inputName="input.json", outputName="output.tex"):
     # the root is never checkpointed
     checkpointable = [n for n in nodes if n is not root]
 
-    # for each combination of the checkpoints, build the trees
-    # and write them all to a single latex file
+    # build the trees for the chosen mode and write them all to a single latex file
     parts = [latex_header()]
-    for combination in permute(len(checkpointable)):
-        perform_checkpointing(checkpointable, combination)
-
-        checkpointed = [n.name for n in checkpointable if n.checkpoint]
-        title = "Checkpointed: " + (", ".join(checkpointed) or "none")
-        title = title.replace("_", r"\_")
-        title += f" \\quad Operation cost: {calculate_operation_cost(checkpointable, root)}"
-        title += f" \\quad Memory cost: {calculate_memory_cost(checkpointable, root)}"
-
-        trees = [generate_forward_tree(root), generate_backward_tree(root)]
-        parts.append(draw_tree(trees, title))
-
+    parts += MODES[mode](checkpointable, root, limits)
     parts.append(latex_footer())
 
     # Write to the output file
@@ -41,4 +28,15 @@ def main(inputName="input.json", outputName="output.tex"):
 
 
 if __name__ == "__main__":
-    main()
+    argParser = argparse.ArgumentParser(description="Draw call tree reversals for checkpointing choices.")
+    argParser.add_argument("-m", "--mode", choices=list(MODES), default="enumerate",
+                           help="enumerate: every combination of checkpoints; "
+                                "heuristic: the result of each heuristic under the memory limit "
+                                "(default: %(default)s)")
+    argParser.add_argument("-i", "--input", default="input.json",
+                           help="input json file (default: %(default)s)")
+    argParser.add_argument("-o", "--output", default="output.tex",
+                           help="output latex file (default: %(default)s)")
+    args = argParser.parse_args()
+
+    raise SystemExit(main(args.input, args.output, args.mode))

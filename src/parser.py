@@ -6,9 +6,11 @@ from .classes import funcNode, visualNode, ArrowMode
 # Parse the json into the appropriate classes
 def parse_json(fileName):
     with open(fileName, 'r') as inFile:
-        functionsJson = json.load(inFile)["functions"]
+        jsonData = json.load(inFile)
+        functionsJson = jsonData["functions"]
+        limits = jsonData["limits"]
 
-    return functionsJson
+    return functionsJson, limits
 
 
 # Populate the function classes with parent and children
@@ -51,12 +53,6 @@ def generate_visual_node(funcNode, modes):
         node.add_arrow_mode(mode)
 
     return node
-
-
-# Recursively generate the node tree
-# returns the forward node and backward node
-def generate_visual_tree(curNode, primal=False):
-    pass
 
 
 # Generate the forward pass branch

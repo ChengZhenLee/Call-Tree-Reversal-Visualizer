@@ -4,7 +4,7 @@ cd /d "%~dp0"
 
 where py >nul 2>nul && (set PYTHON=py -3) || (set PYTHON=python)
 
-%PYTHON% main.py
+%PYTHON% main.py %*
 if errorlevel 1 (
     echo.
     echo Failed. Check that Python 3 is installed and input.json is valid.
