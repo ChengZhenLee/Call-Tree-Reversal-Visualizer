@@ -9,7 +9,7 @@ single LaTeX file.
 
 - Python 3
 
-The tool itself only writes a plain-text `output.tex` file and does not need
+The tool itself only writes a plain-text LaTeX file (`output.tex` by default) and does not need
 LaTeX installed. To view the pictures you need something that can compile
 LaTeX, but this does not have to be a local install (see Usage).
 
@@ -22,11 +22,15 @@ LaTeX, but this does not have to be a local install (see Usage).
    - Linux / macOS: `./run_tool.sh`
    - Windows: double-click `run_tool.bat`
    - Anywhere: `python main.py`
-3. View the result by compiling `output.tex`, either:
+
+   Add options after the command to change the mode, input or output file
+   (see below), e.g. `./run_tool.sh -i my_tree.json -o my_tree.tex`.
+3. View the result by compiling the output file (`output.tex` unless you chose
+   another with `-o`), either:
    - locally with `pdflatex output.tex` (needs the `tikz`, `amsmath`,
      `geometry` and `adjustbox` packages), or
-   - online, with nothing to install: upload or paste `output.tex` into a
-     LaTeX editor such as Overleaf.
+   - online, with nothing to install: upload or paste the file into a LaTeX
+     editor such as Overleaf.
 
 Options (also accepted by the launchers):
 

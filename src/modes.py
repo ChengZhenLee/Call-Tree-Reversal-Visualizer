@@ -22,8 +22,8 @@ def draw_current_setting(checkpointable, root, prefix=""):
     checkpointed = [n.name for n in checkpointable if n.checkpoint]
     title = prefix + "Checkpointed: " + (", ".join(checkpointed) or "none")
     title = title.replace("_", r"\_")
-    title += f" \quad Operation cost: {calculate_operation_cost(checkpointable, root)}"
-    title += f" \quad Memory cost: {calculate_memory_cost(checkpointable, root)}"
+    title += rf" \quad Operation cost: {calculate_operation_cost(checkpointable, root)}"
+    title += rf" \quad Memory cost: {calculate_memory_cost(checkpointable, root)}"
 
     trees = [generate_forward_tree(root), generate_backward_tree(root)]
     return draw_tree(trees, title)

@@ -24,6 +24,7 @@ def main(inputName="input.json", outputName="output.tex", mode="enumerate"):
     with open(outputName, 'w') as outFile:
         outFile.write("\n".join(parts))
 
+    print(f"Wrote {outputName}")
     return 0
 
 
