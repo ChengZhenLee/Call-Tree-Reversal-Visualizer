@@ -31,7 +31,9 @@ if __name__ == "__main__":
     argParser = argparse.ArgumentParser(description="Draw call tree reversals for checkpointing choices.")
     argParser.add_argument("-m", "--mode", choices=list(MODES), default="enumerate",
                            help="enumerate: every combination of checkpoints; "
-                                "heuristic: the result of each heuristic under the memory limit "
+                                "heuristic: the result of each heuristic under the memory limit; "
+                                "dp: the dynamic programming schedule for the number of checkpoints in the input "
+                                "(evolution programs only) "
                                 "(default: %(default)s)")
     argParser.add_argument("-i", "--input", default="input.json",
                            help="input json file (default: %(default)s)")

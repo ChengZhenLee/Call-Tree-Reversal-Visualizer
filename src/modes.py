@@ -1,3 +1,4 @@
+from .dp import dp_checkpointing, check_evolution
 from .cost import calculate_operation_cost, calculate_memory_cost
 from .heuristics import greedyCheckpointing, greedyCheckpointRemoval
 from .latex import draw_tree
@@ -51,10 +52,28 @@ def run_heuristics(checkpointable, root, limits):
     return parts
 
 
+# The dynamic programming schedule for the number of checkpoints in the input,
+# for evolution programs
+def run_dp(checkpointable, root, limits):
+    if not check_evolution(checkpointable, root):
+        raise ValueError("dp mode needs an evolution program: a root with no cost of its own "
+                         "whose children are all leaves")
+
+    checkpoints = limits.get("checkpoints")
+    if not isinstance(checkpoints, int) or checkpoints < 1:
+        raise ValueError('dp mode needs a "checkpoints" entry in "limits": a whole number of at least 1')
+
+    dp_checkpointing(root, checkpoints)
+
+    return [draw_current_setting(checkpointable, root, f"DP with {checkpoints} checkpoints: ")]
+
+
 # what to draw:
 #   "enumerate": every possible combination of checkpoints
 #   "heuristic": only the result of each heuristic above, under the memory limit
+#   "dp": the dynamic programming schedule for the "checkpoints" in the input (evolution programs only)
 MODES = {
     "enumerate": enumerate_all,
     "heuristic": run_heuristics,
+    "dp": run_dp,
 }

@@ -1,0 +1,43 @@
+{
+    "functions": {
+        "f": {
+            "cost": [0, 0, 0, 0, 0, 0, 0],
+            "children": ["g1", "g2", "g3", "g4", "g5", "g6"]
+        },
+
+        "g1": {
+            "cost": [2],
+            "children": []
+        },
+
+        "g2": {
+            "cost": [4],
+            "children": []
+        },
+
+        "g3": {
+            "cost": [5],
+            "children": []
+        },
+
+        "g4": {
+            "cost": [1],
+            "children": []
+        },
+
+        "g5": {
+            "cost": [4],
+            "children": []
+        },
+
+        "g6": {
+            "cost": [4],
+            "children": []
+        }
+    },
+
+    "limits": {
+        "memory": 10000,
+        "checkpoints": 3
+    }
+}

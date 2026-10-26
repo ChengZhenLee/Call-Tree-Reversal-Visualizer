@@ -7,74 +7,13 @@
 \setlength{\parindent}{0pt}
 \begin{document}
 
-\subsection*{Greedy checkpointing increasing: Checkpointed: s, h \quad Operation cost: 260 \quad Memory cost: 120}
+\subsection*{Checkpointed: none \quad Operation cost: 0 \quad Memory cost: 0}
 \adjustbox{max width=\linewidth}{
 \begin{tikzpicture}[
   x=1.0cm, y=-1.0cm,
   every node/.style={inner sep=2pt}]
   \node (n0_0) at (0, 0) {$ \underrightarrow{\mathit{f}} $};
-  \node (n0_1) at (0, 1) {$ \underrightarrow{\mathit{g}} $};
-  \node (n0_2) at (0, 2) {$ \downarrow\overrightarrow{\mathit{h}} $};
-  \node (n0_3) at (1, 1) {$ \downarrow\overrightarrow{\mathit{s}} $};
-  \node (n1_0) at (2, 0) {$ \underleftarrow{\mathit{f}} $};
-  \node (n1_1) at (2, 1) {$ \uparrow\underleftrightarrow{\mathit{s}} $};
-  \node (n1_2) at (3, 1) {$ \underleftarrow{\mathit{g}} $};
-  \node (n1_3) at (3, 2) {$ \uparrow\underleftrightarrow{\mathit{h}} $};
-\end{tikzpicture}
-}
-\bigskip
-
-\subsection*{Greedy checkpointing decreasing: Checkpointed: g, h \quad Operation cost: 390 \quad Memory cost: 110}
-\adjustbox{max width=\linewidth}{
-\begin{tikzpicture}[
-  x=1.0cm, y=-1.0cm,
-  every node/.style={inner sep=2pt}]
-  \node (n0_0) at (0, 0) {$ \underrightarrow{\mathit{f}} $};
-  \node (n0_1) at (0, 1) {$ \downarrow\overrightarrow{\mathit{g}} $};
-  \node (n0_2) at (0, 2) {$ \overrightarrow{\mathit{h}} $};
-  \node (n0_3) at (1, 1) {$ \underrightarrow{\mathit{s}} $};
-  \node (n1_0) at (2, 0) {$ \underleftarrow{\mathit{f}} $};
-  \node (n1_1) at (2, 1) {$ \underleftarrow{\mathit{s}} $};
-  \node (n1_2) at (3, 1) {$ \uparrow\underrightarrow{\mathit{g}} $};
-  \node (n1_3) at (3, 2) {$ \downarrow\overrightarrow{\mathit{h}} $};
-  \node (n1_4) at (4, 1) {$ \underleftarrow{\mathit{g}} $};
-  \node (n1_5) at (4, 2) {$ \uparrow\underleftrightarrow{\mathit{h}} $};
-\end{tikzpicture}
-}
-\bigskip
-
-\subsection*{Greedy checkpoint removal increasing: Checkpointed: g, h \quad Operation cost: 390 \quad Memory cost: 110}
-\adjustbox{max width=\linewidth}{
-\begin{tikzpicture}[
-  x=1.0cm, y=-1.0cm,
-  every node/.style={inner sep=2pt}]
-  \node (n0_0) at (0, 0) {$ \underrightarrow{\mathit{f}} $};
-  \node (n0_1) at (0, 1) {$ \downarrow\overrightarrow{\mathit{g}} $};
-  \node (n0_2) at (0, 2) {$ \overrightarrow{\mathit{h}} $};
-  \node (n0_3) at (1, 1) {$ \underrightarrow{\mathit{s}} $};
-  \node (n1_0) at (2, 0) {$ \underleftarrow{\mathit{f}} $};
-  \node (n1_1) at (2, 1) {$ \underleftarrow{\mathit{s}} $};
-  \node (n1_2) at (3, 1) {$ \uparrow\underrightarrow{\mathit{g}} $};
-  \node (n1_3) at (3, 2) {$ \downarrow\overrightarrow{\mathit{h}} $};
-  \node (n1_4) at (4, 1) {$ \underleftarrow{\mathit{g}} $};
-  \node (n1_5) at (4, 2) {$ \uparrow\underleftrightarrow{\mathit{h}} $};
-\end{tikzpicture}
-}
-\bigskip
-
-\subsection*{Greedy checkpoint removal decreasing: Checkpointed: s, h \quad Operation cost: 260 \quad Memory cost: 120}
-\adjustbox{max width=\linewidth}{
-\begin{tikzpicture}[
-  x=1.0cm, y=-1.0cm,
-  every node/.style={inner sep=2pt}]
-  \node (n0_0) at (0, 0) {$ \underrightarrow{\mathit{f}} $};
-  \node (n0_1) at (0, 1) {$ \underrightarrow{\mathit{g}} $};
-  \node (n0_2) at (0, 2) {$ \downarrow\overrightarrow{\mathit{h}} $};
-  \node (n0_3) at (1, 1) {$ \downarrow\overrightarrow{\mathit{s}} $};
-  \node (n1_0) at (2, 0) {$ \underleftarrow{\mathit{f}} $};
-  \node (n1_1) at (2, 1) {$ \uparrow\underleftrightarrow{\mathit{s}} $};
-  \node (n1_2) at (3, 1) {$ \underleftarrow{\mathit{g}} $};
-  \node (n1_3) at (3, 2) {$ \uparrow\underleftrightarrow{\mathit{h}} $};
+  \node (n1_0) at (1, 0) {$ \underleftarrow{\mathit{f}} $};
 \end{tikzpicture}
 }
 \bigskip

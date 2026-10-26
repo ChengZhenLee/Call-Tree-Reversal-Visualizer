@@ -1,28 +1,13 @@
 {
     "functions": {
         "f": {
-            "cost": [10, 10, 0],
-            "children": ["g", "s"]
-        },
-
-        "g": {
-            "cost": [50, 50],
-            "children": ["h"]
-        },
-
-        "s": {
-            "cost": [20],
-            "children": []
-        },
-
-        "h": {
-            "cost": [50],
+            "cost": [],
             "children": []
         }
     },
 
     "limits": {
-        "memory": 120,
-        "runtime": 10000
+        "memory": 0,
+        "checkpoints": 0
     }
 }
