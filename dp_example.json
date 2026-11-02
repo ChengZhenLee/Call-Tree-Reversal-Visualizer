@@ -37,7 +37,7 @@
     },
 
     "limits": {
-        "memory": 10000,
+        "memory": 10,
         "checkpoints": 3
     }
 }

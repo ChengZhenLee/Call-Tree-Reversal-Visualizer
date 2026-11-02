@@ -86,6 +86,10 @@ the stored start state, so a limit of 3 gives two checkpointed functions. A
 checkpoint at split `s` is drawn as child `s` being checkpointed, so the last
 child is never checkpointed. The splits are fixed positions, each saved once.
 
+The DP limits only the number of checkpoints. It ignores the `memory` limit, so
+the memory cost in the title can be higher than that limit. The title shows the
+checkpoint limit and notes that the memory limit is not enforced.
+
 ## Input format
 
 ```json

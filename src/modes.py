@@ -18,12 +18,13 @@ HEURISTICS = {
 
 
 # Draw the trees for the current checkpoint setting, titled with the costs
-def draw_current_setting(checkpointable, root, prefix=""):
+def draw_current_setting(checkpointable, root, prefix="", suffix=""):
     checkpointed = [n.name for n in checkpointable if n.checkpoint]
     title = prefix + "Checkpointed: " + (", ".join(checkpointed) or "none")
     title = title.replace("_", r"\_")
     title += rf" \quad Operation cost: {calculate_operation_cost(checkpointable, root)}"
     title += rf" \quad Memory cost: {calculate_memory_cost(checkpointable, root)}"
+    title += suffix
 
     trees = [generate_forward_tree(root), generate_backward_tree(root)]
     return draw_tree(trees, title)
@@ -47,7 +48,8 @@ def run_heuristics(checkpointable, root, limits):
         feasible = heuristic(checkpointable, root, limits["memory"])
 
         status = "" if feasible else "(over memory limit) "
-        parts.append(draw_current_setting(checkpointable, root, f"{name}: {status}"))
+        parts.append(draw_current_setting(checkpointable, root, f"{name}: {status}",
+                                          rf" \quad Memory limit: {limits['memory']}"))
 
     return parts
 
@@ -65,7 +67,10 @@ def run_dp(checkpointable, root, limits):
 
     dp_checkpointing(root, checkpoints)
 
-    return [draw_current_setting(checkpointable, root, f"DP with {checkpoints} checkpoints: ")]
+    # The DP only limits the number of checkpoints, not memory
+    suffix = rf" \quad Checkpoint limit: {checkpoints} (memory limit not enforced)"
+
+    return [draw_current_setting(checkpointable, root, "DP: ", suffix)]
 
 
 # what to draw:
