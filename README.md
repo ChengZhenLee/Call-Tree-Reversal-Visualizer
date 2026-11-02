@@ -86,9 +86,13 @@ the stored start state, so a limit of 3 gives two checkpointed functions. A
 checkpoint at split `s` is drawn as child `s` being checkpointed, so the last
 child is never checkpointed. The splits are fixed positions, each saved once.
 
-The DP limits only the number of checkpoints. It ignores the `memory` limit, so
-the memory cost in the title can be higher than that limit. The title shows the
-checkpoint limit and notes that the memory limit is not enforced.
+The title shows the DP's own costs rather than the call tree ones. Each step is
+recorded once when it is reversed, so the operation cost is the sum of all step
+costs plus the advancing the schedule does. Steps are reversed one at a time and
+stored states are not counted, so the peak memory is the largest single step,
+whatever the number of checkpoints. The title shows the checkpoint limit, the
+`memory` limit and the peak memory, and is marked "(over memory limit)" when the
+largest step does not fit.
 
 ## Input format
 

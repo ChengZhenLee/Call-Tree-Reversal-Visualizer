@@ -94,5 +94,16 @@ def create_visual_table(table, checkpoints):
     return visual_table
 
 
+# Operation cost and peak memory of the DP schedule. Every step is recorded once
+# when it is reversed, on top of the advancing counted in the table. Steps are
+# reversed one at a time and stored states are free, so the peak memory is the
+# largest single step
+def dp_costs(root, visualTable, checkpoints):
+    stepCosts = [sum(child.costs) for child in root.children]
+    advanceCost = visualTable[(0, len(stepCosts))][checkpoints - 1][0]
+
+    return sum(stepCosts) + advanceCost, max(stepCosts, default=0)
+
+
 def check_evolution(nodes, root):
     return all(node.parent is root and len(node.children) == 0 for node in nodes) and sum(root.costs) == 0

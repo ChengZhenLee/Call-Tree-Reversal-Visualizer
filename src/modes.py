@@ -1,4 +1,4 @@
-from .dp import dp_checkpointing, check_evolution
+from .dp import dp_checkpointing, dp_costs, check_evolution
 from .cost import calculate_operation_cost, calculate_memory_cost
 from .heuristics import greedyCheckpointing, greedyCheckpointRemoval
 from .latex import draw_tree
@@ -17,14 +17,18 @@ HEURISTICS = {
 }
 
 
-# Draw the trees for the current checkpoint setting, titled with the costs
-def draw_current_setting(checkpointable, root, prefix="", suffix=""):
+# Draw the trees for the current checkpoint setting, titled with the costs.
+# stats is a list of (label, value) pairs shown after the checkpoints, and
+# defaults to the call tree operation and memory cost
+def draw_current_setting(checkpointable, root, prefix="", stats=None):
+    if stats is None:
+        stats = [("Operation cost", calculate_operation_cost(checkpointable, root)),
+                 ("Memory cost", calculate_memory_cost(checkpointable, root))]
+
     checkpointed = [n.name for n in checkpointable if n.checkpoint]
     title = prefix + "Checkpointed: " + (", ".join(checkpointed) or "none")
     title = title.replace("_", r"\_")
-    title += rf" \quad Operation cost: {calculate_operation_cost(checkpointable, root)}"
-    title += rf" \quad Memory cost: {calculate_memory_cost(checkpointable, root)}"
-    title += suffix
+    title += "".join(rf" \quad {label}: {value}" for label, value in stats)
 
     trees = [generate_forward_tree(root), generate_backward_tree(root)]
     return draw_tree(trees, title)
@@ -48,8 +52,10 @@ def run_heuristics(checkpointable, root, limits):
         feasible = heuristic(checkpointable, root, limits["memory"])
 
         status = "" if feasible else "(over memory limit) "
-        parts.append(draw_current_setting(checkpointable, root, f"{name}: {status}",
-                                          rf" \quad Memory limit: {limits['memory']}"))
+        stats = [("Operation cost", calculate_operation_cost(checkpointable, root)),
+                 ("Memory cost", calculate_memory_cost(checkpointable, root)),
+                 ("Memory limit", limits["memory"])]
+        parts.append(draw_current_setting(checkpointable, root, f"{name}: {status}", stats))
 
     return parts
 
@@ -65,12 +71,20 @@ def run_dp(checkpointable, root, limits):
     if not isinstance(checkpoints, int) or checkpoints < 1:
         raise ValueError('dp mode needs a "checkpoints" entry in "limits": a whole number of at least 1')
 
-    dp_checkpointing(root, checkpoints)
+    visualTable = dp_checkpointing(root, checkpoints)
 
-    # The DP only limits the number of checkpoints, not memory
-    suffix = rf" \quad Checkpoint limit: {checkpoints} (memory limit not enforced)"
+    # The call tree cost functions don't describe the DP schedule, so use its own costs
+    operationCost, peakMemory = dp_costs(root, visualTable, checkpoints)
+    stats = [("Operation cost", operationCost), ("Checkpoint limit", checkpoints)]
 
-    return [draw_current_setting(checkpointable, root, "DP: ", suffix)]
+    status = ""
+    if "memory" in limits:
+        stats.append(("Memory limit", limits["memory"]))
+        if peakMemory > limits["memory"]:
+            status = "(over memory limit) "
+    stats.append(("Peak memory", peakMemory))
+
+    return [draw_current_setting(checkpointable, root, f"DP: {status}", stats)]
 
 
 # what to draw:
