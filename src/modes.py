@@ -107,7 +107,7 @@ def run_random(inputName, outputName, options):
     from .tree_generator import generate_tree, scale_bias, DEPTH_RANGE, WIDTH_RANGE
 
     n, depth, width = options["nodes"], options["depth"], options["width"]
-    maxChildren, maxCost, alpha = options["maxChildren"], options["maxCost"], options["alpha"]
+    maxChildren, maxSegmentCost, alpha = options["maxChildren"], options["maxSegmentCost"], options["alpha"]
     if n < 2:
         raise ValueError("random mode needs at least 2 nodes")
     if not (-1 <= depth <= 1 and -1 <= width <= 1):
@@ -116,7 +116,7 @@ def run_random(inputName, outputName, options):
         raise ValueError("alpha must be between 0 and 1")
     if maxChildren is not None and maxChildren < 1:
         raise ValueError("the child limit must be at least 1")
-    if maxCost < 1:
+    if maxSegmentCost < 1:
         raise ValueError("the largest cost must be at least 1")
 
     # Pick a seed when none is given, and show it so the tree can be rebuilt
@@ -130,7 +130,7 @@ def run_random(inputName, outputName, options):
         depthBias=scale_bias(depth, DEPTH_RANGE),
         widthBias=scale_bias(width, WIDTH_RANGE),
         maxChildren=maxChildren,
-        maxCost=maxCost,
+        maxSegmentCost=maxSegmentCost,
         rng=random.Random(seed),
     )
 
@@ -143,7 +143,7 @@ def run_random(inputName, outputName, options):
 
     settings = [("Seed", seed), ("Nodes", n), ("Depth", depth), ("Width", width),
                 ("Child limit", "none" if maxChildren is None else maxChildren),
-                ("Largest cost", maxCost), ("Alpha", alpha),
+                ("Largest segment cost", maxSegmentCost), ("Alpha", alpha),
                 ("Memory range", f"{minMem}--{maxMem}"), ("Memory limit", f"{limit:g}")]
     parts = [r"\subsection*{Random tree}" + "\n"
              + r" \quad ".join(f"{label}: {value}" for label, value in settings) + "\n" + r"\bigskip" + "\n"]

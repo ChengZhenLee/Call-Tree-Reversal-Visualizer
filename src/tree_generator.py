@@ -14,7 +14,7 @@ WIDTH_RANGE = (-5.0, 2.0)
 NODE_COUNTS = [8, 12, 16]
 # 0 leaves no parent to attach to, and 1 always gives a chain
 CHILD_LIMITS = [2, 3, 4, 5, None]
-MAX_COSTS = [1, 10, 20, 50, 100]
+MAX_SEGMENT_COSTS = [1, 10, 20, 50, 100]
 ALPHAS = [0, 0.25, 0.5, 0.75, 1.0]
 
 
@@ -23,7 +23,7 @@ def scale_bias(u, rawRange):
     return u * high if u >= 0 else -u * low
 
 
-def generate_tree(n, depthBias=0.0, widthBias = 0.0, maxChildren=None, maxCost=10, rng=None):
+def generate_tree(n, depthBias=0.0, widthBias = 0.0, maxChildren=None, maxSegmentCost=10, rng=None):
     rng = rng or random.Random()
     root = funcNode("0")
     nodes = [root]
@@ -47,7 +47,7 @@ def generate_tree(n, depthBias=0.0, widthBias = 0.0, maxChildren=None, maxCost=1
 
     # Costs: one segment before, between and after the children
     for x in nodes:
-        x.costs = [rng.randint(1, maxCost) for _ in range(len(x.children) + 1)]
+        x.costs = [rng.randint(0, maxSegmentCost) for _ in range(len(x.children) + 1)]
 
     return root, nodes
 
@@ -73,7 +73,7 @@ def checkpointed_names(nodes, combination):
 
 CSV_COLUMNS = [
     # tree settings
-    "seed", "nodes", "depthSetting", "widthSetting", "maxChildren", "maxCost",
+    "seed", "nodes", "depthSetting", "widthSetting", "maxChildren", "maxSegmentCost",
     # tree measurements
     "maxDepth", "maxChildrenFound", "leaves",
     # memory limit
@@ -96,7 +96,7 @@ def generate_random_trees(outputName="results.csv", treesPerSetting=10):
     widthSettings = np.linspace(-1, 1, 5)
 
     total = (treesPerSetting * len(depthSettings) * len(widthSettings)
-             * len(NODE_COUNTS) * len(CHILD_LIMITS) * len(MAX_COSTS))
+             * len(NODE_COUNTS) * len(CHILD_LIMITS) * len(MAX_SEGMENT_COSTS))
     done = 0
 
     with open(outputName, "w", newline="") as outFile:
@@ -106,8 +106,8 @@ def generate_random_trees(outputName="results.csv", treesPerSetting=10):
         # Smallest trees first, so a run stopped early still has complete
         # results for the smaller sizes
         for n in NODE_COUNTS:
-            for seed, depthSetting, widthSetting, maxChildren, maxCost in itertools.product(
-                    range(treesPerSetting), depthSettings, widthSettings, CHILD_LIMITS, MAX_COSTS):
+            for seed, depthSetting, widthSetting, maxChildren, maxSegmentCost in itertools.product(
+                    range(treesPerSetting), depthSettings, widthSettings, CHILD_LIMITS, MAX_SEGMENT_COSTS):
                 done += 1
                 print(f"\rTree {done}/{total}", end="", flush=True)
 
@@ -117,7 +117,7 @@ def generate_random_trees(outputName="results.csv", treesPerSetting=10):
                     depthBias=scale_bias(depthSetting, DEPTH_RANGE),
                     widthBias=scale_bias(widthSetting, WIDTH_RANGE),
                     maxChildren=maxChildren,
-                    maxCost=maxCost,
+                    maxSegmentCost=maxSegmentCost,
                     rng=rng,
                 )
 
@@ -131,14 +131,14 @@ def generate_random_trees(outputName="results.csv", treesPerSetting=10):
                     "seed": seed, "nodes": n,
                     "depthSetting": depthSetting, "widthSetting": widthSetting,
                     "maxChildren": "none" if maxChildren is None else maxChildren,
-                    "maxCost": maxCost,
+                    "maxSegmentCost": maxSegmentCost,
                     **measure_tree(root, nodes),
                     "minMemory": minMem, "maxMemory": maxMem,
                 }
 
                 for alpha in ALPHAS:
                     # The limit is never below minMem, so the optimum always exists
-                    limit = minMem + alpha * (maxMem - minMem)
+                    limit = round(minMem + alpha * (maxMem - minMem))
                     optMemory, optCost, optCombination = find_optimum(results, limit)
 
                     for name, heuristic in HEURISTICS.items():

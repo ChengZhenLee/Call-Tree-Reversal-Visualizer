@@ -9,7 +9,7 @@ DEFAULT_OPTIONS = {
     "depth": 0.0,
     "width": 0.0,
     "maxChildren": None,
-    "maxCost": 10,
+    "maxSegmentCost": 10,
     "seed": None,
     "alpha": 0.5,
 }
@@ -49,8 +49,8 @@ if __name__ == "__main__":
                                  "1 parents with many (hubs, stars) (default: %(default)s)")
     randomArgs.add_argument("--max-children", dest="maxChildren", type=int, default=DEFAULT_OPTIONS["maxChildren"],
                             help="most children per function (default: no limit)")
-    randomArgs.add_argument("--max-cost", dest="maxCost", type=int, default=DEFAULT_OPTIONS["maxCost"],
-                            help="largest cost of a segment, each is drawn from 1 to this (default: %(default)s)")
+    randomArgs.add_argument("--max-segment-cost", dest="maxSegmentCost", type=int, default=DEFAULT_OPTIONS["maxSegmentCost"],
+                            help="largest cost of a segment, each is drawn from 0 to this (default: %(default)s)")
     randomArgs.add_argument("--seed", type=int, default=DEFAULT_OPTIONS["seed"],
                             help="seed to rebuild a tree (default: random, printed)")
     randomArgs.add_argument("--alpha", type=float, default=DEFAULT_OPTIONS["alpha"],

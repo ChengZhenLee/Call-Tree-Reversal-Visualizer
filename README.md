@@ -43,7 +43,7 @@ Options (also accepted by the launchers):
 | `-t`, `--trees` | `experiment` only: trees per combination of settings | `10` |
 
 Random mode also takes `--nodes`, `--depth`, `--width`, `--max-children`,
-`--max-cost`, `--seed` and `--alpha` (see Random mode below).
+`--max-segment-cost`, `--seed` and `--alpha` (see Random mode below).
 
 For example: `python main.py --mode heuristic`.
 
@@ -117,12 +117,12 @@ limit)". The first line of the output lists the settings and the memory range.
 | `--depth` | from -1 (favours shallow parents: wide trees) to 1 (favours deep parents: chains) | `0` |
 | `--width` | from -1 (favours parents with few children: thin trees) to 1 (favours parents with many: hubs and stars) | `0` |
 | `--max-children` | most children per function | no limit |
-| `--max-cost` | each cost segment is drawn from 1 to this | `10` |
+| `--max-segment-cost` | each cost segment is drawn from 0 to this | `10` |
 | `--seed` | rebuilds the same tree with the same settings | random, printed |
 | `--alpha` | memory limit between the lowest (0) and highest (1) memory any choice reaches | `0.5` |
 
 To look at a tree from the experiment CSV, pass its `seed`, `nodes`,
-`depthSetting`, `widthSetting`, `maxChildren`, `maxCost` and `alpha`.
+`depthSetting`, `widthSetting`, `maxChildren`, `maxSegmentCost` and `alpha`.
 
 ### Experiment mode
 
