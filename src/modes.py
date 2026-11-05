@@ -1,20 +1,11 @@
+import random
+
 from .dp import dp_checkpointing, dp_costs, check_evolution
 from .cost import calculate_operation_cost, calculate_memory_cost
-from .heuristics import greedyCheckpointing, greedyCheckpointRemoval
-from .latex import draw_tree
-from .parser import permute, perform_checkpointing, generate_forward_tree, generate_backward_tree
-
-# name shown in the title -> heuristic taking (nodes, root, maxMemory)
-HEURISTICS = {
-    "Greedy checkpointing increasing": lambda nodes, root, maxMem:
-        greedyCheckpointing(nodes, root, maxMem, increasing=True),
-    "Greedy checkpointing decreasing": lambda nodes, root, maxMem:
-        greedyCheckpointing(nodes, root, maxMem, increasing=False),
-    "Greedy checkpoint removal increasing": lambda nodes, root, maxMem:
-        greedyCheckpointRemoval(nodes, root, maxMem, increasing=True),
-    "Greedy checkpoint removal decreasing": lambda nodes, root, maxMem:
-        greedyCheckpointRemoval(nodes, root, maxMem, increasing=False),
-}
+from .heuristics import HEURISTICS, run_heuristic
+from .latex import draw_tree, latex_header, latex_footer
+from .parser import (parse_json, parse_functions, permute, perform_checkpointing,
+                     generate_forward_tree, generate_backward_tree)
 
 
 # Draw the trees for the current checkpoint setting, titled with the costs.
@@ -48,12 +39,11 @@ def enumerate_all(checkpointable, root, limits):
 def run_heuristics(checkpointable, root, limits):
     parts = []
     for name, heuristic in HEURISTICS.items():
-        perform_checkpointing(checkpointable, [False] * len(checkpointable))
-        feasible = heuristic(checkpointable, root, limits["memory"])
+        feasible, memory, cost, _ = run_heuristic(heuristic, checkpointable, root, limits["memory"])
 
         status = "" if feasible else "(over memory limit) "
-        stats = [("Operation cost", calculate_operation_cost(checkpointable, root)),
-                 ("Memory cost", calculate_memory_cost(checkpointable, root)),
+        stats = [("Operation cost", cost),
+                 ("Memory cost", memory),
                  ("Memory limit", limits["memory"])]
         parts.append(draw_current_setting(checkpointable, root, f"{name}: {status}", stats))
 
@@ -87,12 +77,111 @@ def run_dp(checkpointable, root, limits):
     return [draw_current_setting(checkpointable, root, f"DP: {status}", stats)]
 
 
-# what to draw:
+# Write the pictures to one LaTeX file
+def write_latex(outputName, parts):
+    with open(outputName, 'w') as outFile:
+        outFile.write("\n".join([latex_header()] + parts + [latex_footer()]))
+
+
+# Turn a drawing function (checkpointable, root, limits) -> LaTeX parts into a
+# mode: read the call tree from the input json and write the pictures to one
+# LaTeX file
+def latex_mode(draw):
+    def run(inputName, outputName, options):
+        functionsJson, limits = parse_json(inputName)
+        nodes, root = parse_functions(functionsJson)
+
+        # the root is never checkpointed
+        checkpointable = [n for n in nodes if n is not root]
+
+        write_latex(outputName, draw(checkpointable, root, limits))
+
+    return run
+
+
+# Generate one random tree, find its optimum by brute force under the memory
+# limit set by alpha, and draw the optimum next to every heuristic. Ignores the
+# input file
+def run_random(inputName, outputName, options):
+    from .brute_force import brute_force, find_optimum
+    from .tree_generator import generate_tree, scale_bias, DEPTH_RANGE, WIDTH_RANGE
+
+    n, depth, width = options["nodes"], options["depth"], options["width"]
+    maxChildren, maxCost, alpha = options["maxChildren"], options["maxCost"], options["alpha"]
+    if n < 2:
+        raise ValueError("random mode needs at least 2 nodes")
+    if not (-1 <= depth <= 1 and -1 <= width <= 1):
+        raise ValueError("the depth and width settings must be between -1 and 1")
+    if not 0 <= alpha <= 1:
+        raise ValueError("alpha must be between 0 and 1")
+    if maxChildren is not None and maxChildren < 1:
+        raise ValueError("the child limit must be at least 1")
+    if maxCost < 1:
+        raise ValueError("the largest cost must be at least 1")
+
+    # Pick a seed when none is given, and show it so the tree can be rebuilt
+    seed = options["seed"]
+    if seed is None:
+        seed = random.randrange(2**32)
+    print(f"Seed: {seed}")
+
+    root, nodes = generate_tree(
+        n,
+        depthBias=scale_bias(depth, DEPTH_RANGE),
+        widthBias=scale_bias(width, WIDTH_RANGE),
+        maxChildren=maxChildren,
+        maxCost=maxCost,
+        rng=random.Random(seed),
+    )
+
+    # The root is never checkpointed. generate_tree puts it first
+    checkpointable = nodes[1:]
+
+    minMem, maxMem, results = brute_force(checkpointable, root)
+    limit = minMem + alpha * (maxMem - minMem)
+    optMemory, optCost, optCombination = find_optimum(results, limit)
+
+    settings = [("Seed", seed), ("Nodes", n), ("Depth", depth), ("Width", width),
+                ("Child limit", "none" if maxChildren is None else maxChildren),
+                ("Largest cost", maxCost), ("Alpha", alpha),
+                ("Memory range", f"{minMem}--{maxMem}"), ("Memory limit", f"{limit:g}")]
+    parts = [r"\subsection*{Random tree}" + "\n"
+             + r" \quad ".join(f"{label}: {value}" for label, value in settings) + "\n" + r"\bigskip" + "\n"]
+
+    perform_checkpointing(checkpointable, optCombination)
+    parts.append(draw_current_setting(checkpointable, root, "Optimum: ",
+                                      [("Operation cost", optCost), ("Memory cost", optMemory)]))
+
+    for name, heuristic in HEURISTICS.items():
+        feasible, memory, cost, _ = run_heuristic(heuristic, checkpointable, root, limit)
+
+        status = "" if feasible else "(over memory limit) "
+        stats = [("Operation cost", cost), ("Memory cost", memory)]
+        if feasible:
+            stats.append(("Cost ratio", f"{cost / optCost:.2f}"))
+        parts.append(draw_current_setting(checkpointable, root, f"{name}: {status}", stats))
+
+    write_latex(outputName, parts)
+
+
+# Generate random trees, compare the heuristics with the optimum and write a CSV.
+# Ignores the input file. Imported here so the other modes run without numpy
+def run_experiment(inputName, outputName, options):
+    from .tree_generator import generate_random_trees
+    generate_random_trees(outputName, options["trees"])
+
+
+# Every mode takes (inputName, outputName, options), where options holds the
+# command line settings:
 #   "enumerate": every possible combination of checkpoints
 #   "heuristic": only the result of each heuristic above, under the memory limit
 #   "dp": the dynamic programming schedule for the "checkpoints" in the input (evolution programs only)
+#   "random": one random tree, its optimum and every heuristic
+#   "experiment": random trees compared against the optimum, written to a CSV
 MODES = {
-    "enumerate": enumerate_all,
-    "heuristic": run_heuristics,
-    "dp": run_dp,
+    "enumerate": latex_mode(enumerate_all),
+    "heuristic": latex_mode(run_heuristics),
+    "dp": latex_mode(run_dp),
+    "random": run_random,
+    "experiment": run_experiment,
 }

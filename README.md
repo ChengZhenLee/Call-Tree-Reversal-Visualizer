@@ -8,6 +8,7 @@ single LaTeX file.
 ## Requirements
 
 - Python 3
+- numpy, for `--mode experiment` only (`pip install numpy`)
 
 The tool itself only writes a plain-text LaTeX file (`output.tex` by default) and does not need
 LaTeX installed. To view the pictures you need something that can compile
@@ -36,9 +37,13 @@ Options (also accepted by the launchers):
 
 | Flag | Meaning | Default |
 |---|---|---|
-| `-m`, `--mode` | `enumerate`: every combination of checkpoints; `heuristic`: only the result of each greedy heuristic under the memory limit; `dp`: the dynamic programming schedule for the `checkpoints` limit (evolution programs only) | `enumerate` |
-| `-i`, `--input` | input json file | `input.json` |
-| `-o`, `--output` | output latex file | `output.tex` |
+| `-m`, `--mode` | `enumerate`: every combination of checkpoints; `heuristic`: only the result of each greedy heuristic under the memory limit; `dp`: the dynamic programming schedule for the `checkpoints` limit (evolution programs only); `random`: one random tree, its optimum and every heuristic; `experiment`: random trees compared against the optimum, written to a CSV | `enumerate` |
+| `-i`, `--input` | input json file (not used by `random` or `experiment`) | `input.json` |
+| `-o`, `--output` | output file | `output.tex`, or `results.csv` for `experiment` |
+| `-t`, `--trees` | `experiment` only: trees per combination of settings | `10` |
+
+Random mode also takes `--nodes`, `--depth`, `--width`, `--max-children`,
+`--max-cost`, `--seed` and `--alpha` (see Random mode below).
 
 For example: `python main.py --mode heuristic`.
 
@@ -93,6 +98,63 @@ stored states are not counted, so the peak memory is the largest single step,
 whatever the number of checkpoints. The title shows the checkpoint limit, the
 `memory` limit and the peak memory, and is marked "(over memory limit)" when the
 largest step does not fit.
+
+### Random mode
+
+```
+python main.py --mode random --nodes 8 --depth 0.5 --width -0.5 --alpha 0.3
+```
+
+Generates one random call tree instead of reading an input file, finds the
+cheapest checkpoint choice under the memory limit by trying every combination
+(the optimum), and draws it followed by the result of every heuristic. Each
+heuristic's title shows its cost ratio to the optimum, or "(over memory
+limit)". The first line of the output lists the settings and the memory range.
+
+| Flag | Meaning | Default |
+|---|---|---|
+| `--nodes` | number of functions, including the root | `8` |
+| `--depth` | from -1 (favours shallow parents: wide trees) to 1 (favours deep parents: chains) | `0` |
+| `--width` | from -1 (favours parents with few children: thin trees) to 1 (favours parents with many: hubs and stars) | `0` |
+| `--max-children` | most children per function | no limit |
+| `--max-cost` | each cost segment is drawn from 1 to this | `10` |
+| `--seed` | rebuilds the same tree with the same settings | random, printed |
+| `--alpha` | memory limit between the lowest (0) and highest (1) memory any choice reaches | `0.5` |
+
+To look at a tree from the experiment CSV, pass its `seed`, `nodes`,
+`depthSetting`, `widthSetting`, `maxChildren`, `maxCost` and `alpha`.
+
+### Experiment mode
+
+```
+python main.py --mode experiment --trees 10 --output results.csv
+```
+
+Generates random call trees instead of reading an input file. It makes one
+tree for every combination of the settings at the top of
+`src/tree_generator.py`, `--trees` times with different seeds:
+
+- depth and width settings from -1 to 1, which favour deep or shallow parents
+  and parents with many or few children
+- number of nodes, limit on children per node, and largest segment cost
+
+For each tree it tries every checkpoint combination to find the lowest
+(`minMemory`) and highest (`maxMemory`) memory cost. For each `alpha` it sets
+the memory limit to `minMemory + alpha * (maxMemory - minMemory)`, finds the
+cheapest combination that fits (the optimum) and runs every heuristic.
+
+The CSV has one row per tree, alpha and heuristic, with the settings, the
+tree's measured shape, the limit, the optimum and the heuristic's result.
+`costRatio` is the heuristic's operation cost divided by the optimum's (blank
+when it is over the limit), and `isOptimal` says whether it matched the
+optimum. A tree can be rebuilt from its `seed` and settings.
+
+Trying every combination doubles in time with each extra node: about 1 to 2 s
+for a 16-node tree, and roughly 15 s or more at 20 nodes. The default settings
+(up to 16 nodes, `--trees 10`) take about 3 hours. Trees are generated
+smallest first, so a run stopped early still has complete results for the
+smaller sizes. The last tree of a stopped run may have fewer rows than the
+others, so drop it before analysing.
 
 ## Input format
 
@@ -151,7 +213,9 @@ src/
   parser.py         reads the json, builds the forward/backward trees
   cost.py           operation and memory cost
   heuristics.py     greedy checkpointing heuristics
+  brute_force.py    tries every checkpoint combination, finds the optimum under a memory limit
+  tree_generator.py random call trees and the experiment CSV
   dp.py             dynamic programming checkpoint schedule for evolution programs
-  modes.py          what to draw: enumerate all, run the heuristics or the dynamic programming schedule
+  modes.py          the modes: enumerate all, run the heuristics, the dynamic programming schedule, or the experiment
   latex.py          draws the trees as LaTeX/TikZ
 ```
