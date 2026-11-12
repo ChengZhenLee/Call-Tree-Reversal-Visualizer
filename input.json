@@ -2,6 +2,7 @@
     "functions": {
         "f": {
             "cost": [],
+            "snapshot": 0,
             "children": []
         }
     },

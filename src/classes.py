@@ -16,7 +16,10 @@ class VisualMode(Enum):
 
 
 class funcNode:
-    def __init__(self, name, costs=None):
+    # snapshot: memory needed to store this function's inputs when it is
+    # checkpointed. Saving and loading it each cost this much again
+    def __init__(self, name, costs=None, snapshot=0):
+        self.snapshot = snapshot
         self.name = name
         self.parent = None
         self.children = []
@@ -30,15 +33,19 @@ class funcNode:
     def add_child(self, node):
         self.children.append(node)
 
-    def calculate_cumulative_cost(self, childNode):
-        cumulative_cost = 0
+    # Memory this node holds when it reaches childNode during the reversal: its
+    # own segments up to the call, plus everything the earlier children left
+    # behind. Those are reversed after childNode, so they are still held
+    def calculate_memory_before_child(self, childNode):
+        memory_cost = 0
 
-        for i in range(len(self.children)):
-            cumulative_cost += self.costs[i]
-            if self.children[i] == childNode:
+        for i, child in enumerate(self.children):
+            memory_cost += self.costs[i]
+            if child == childNode:
                 break
+            memory_cost += child.calculate_memory_held()
 
-        return cumulative_cost
+        return memory_cost
 
     def calculate_total_cost(self):
         total_cost = sum(self.costs)
@@ -47,22 +54,28 @@ class funcNode:
 
         return total_cost
 
-    # Memory cost of this node's own run, leaving out every checkpointed
-    # subtree below it
+    # Memory this node leaves held in its caller after it returns: its snapshot
+    # when checkpointed, otherwise its whole tape
+    def calculate_memory_held(self):
+        if self.checkpoint:
+            return self.snapshot
+        return self.calculate_memory_own_run_cost()
+
+    # Memory cost of this node's own run. A checkpointed subtree below it is
+    # left out, but its snapshot is held instead
     def calculate_memory_own_run_cost(self):
         memory_cost = sum(self.costs)
         for child in self.children:
-            if not child.checkpoint:
-                memory_cost += child.calculate_memory_own_run_cost()
+            memory_cost += child.calculate_memory_held()
 
         return memory_cost
 
-    # Memory cost already held by all the ancestors before they call down to this node
+    # Memory cost already held by all the ancestors when this node is reversed
     def calculate_memory_ancestor_cost(self):
         memory_cost = 0
         node = self
         while node.parent:
-            memory_cost += node.parent.calculate_cumulative_cost(node)
+            memory_cost += node.parent.calculate_memory_before_child(node)
             node = node.parent
 
         return memory_cost

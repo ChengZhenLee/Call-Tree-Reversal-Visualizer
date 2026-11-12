@@ -2,7 +2,8 @@ def calculate_operation_cost(nodes, root):
     cost = root.calculate_total_cost()
     for node in nodes:
         if node.checkpoint:
-            cost += node.calculate_total_cost()
+            # re-run of the subtree, plus saving and loading its snapshot
+            cost += node.calculate_total_cost() + node.snapshot * 2
 
     return cost
 

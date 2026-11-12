@@ -118,6 +118,11 @@ def run_random(inputName, outputName, options):
         raise ValueError("the child limit must be at least 1")
     if maxSegmentCost < 1:
         raise ValueError("the largest cost must be at least 1")
+    maxSnapshotCost = options["maxSnapshotCost"]
+    if maxSnapshotCost is None:
+        maxSnapshotCost = maxSegmentCost
+    if maxSnapshotCost < 0:
+        raise ValueError("the largest snapshot cost must be at least 0")
 
     # Pick a seed when none is given, and show it so the tree can be rebuilt
     seed = options["seed"]
@@ -131,6 +136,7 @@ def run_random(inputName, outputName, options):
         widthBias=scale_bias(width, WIDTH_RANGE),
         maxChildren=maxChildren,
         maxSegmentCost=maxSegmentCost,
+        maxSnapshotCost=maxSnapshotCost,
         rng=random.Random(seed),
     )
 
@@ -143,7 +149,8 @@ def run_random(inputName, outputName, options):
 
     settings = [("Seed", seed), ("Nodes", n), ("Depth", depth), ("Width", width),
                 ("Child limit", "none" if maxChildren is None else maxChildren),
-                ("Largest segment cost", maxSegmentCost), ("Alpha", alpha),
+                ("Largest segment cost", maxSegmentCost),
+                ("Largest snapshot cost", maxSnapshotCost), ("Alpha", alpha),
                 ("Memory range", f"{minMem}--{maxMem}"), ("Memory limit", f"{limit:g}")]
     parts = [r"\subsection*{Random tree}" + "\n"
              + r" \quad ".join(f"{label}: {value}" for label, value in settings) + "\n" + r"\bigskip" + "\n"]

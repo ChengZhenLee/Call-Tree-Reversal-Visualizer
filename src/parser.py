@@ -17,7 +17,7 @@ def parse_json(fileName):
 def parse_functions(functionsJson):
     # Create all nodes, stored as a dictionary
     nodes = {
-        name: funcNode(name, desc["cost"])
+        name: funcNode(name, desc["cost"], desc.get("snapshot", 0))
         for name, desc in functionsJson.items()
     }
 

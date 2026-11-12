@@ -118,11 +118,13 @@ limit)". The first line of the output lists the settings and the memory range.
 | `--width` | from -1 (favours parents with few children: thin trees) to 1 (favours parents with many: hubs and stars) | `0` |
 | `--max-children` | most children per function | no limit |
 | `--max-segment-cost` | each cost segment is drawn from 0 to this | `10` |
+| `--max-snapshot-cost` | each snapshot (except the root's, which is 0) is drawn from 0 to this | same as `--max-segment-cost` |
 | `--seed` | rebuilds the same tree with the same settings | random, printed |
 | `--alpha` | memory limit between the lowest (0) and highest (1) memory any choice reaches | `0.5` |
 
 To look at a tree from the experiment CSV, pass its `seed`, `nodes`,
-`depthSetting`, `widthSetting`, `maxChildren`, `maxSegmentCost` and `alpha`.
+`depthSetting`, `widthSetting`, `maxChildren`, `maxSegmentCost`,
+`maxSnapshotCost` and `alpha`.
 
 ### Experiment mode
 
@@ -136,7 +138,8 @@ tree for every combination of the settings at the top of
 
 - depth and width settings from -1 to 1, which favour deep or shallow parents
   and parents with many or few children
-- number of nodes, limit on children per node, and largest segment cost
+- number of nodes, limit on children per node, largest segment cost and
+  largest snapshot cost
 
 For each tree it tries every checkpoint combination to find the lowest
 (`minMemory`) and highest (`maxMemory`) memory cost. For each `alpha` it sets
@@ -151,7 +154,7 @@ optimum. A tree can be rebuilt from its `seed` and settings.
 
 Trying every combination doubles in time with each extra node: about 1 to 2 s
 for a 16-node tree, and roughly 15 s or more at 20 nodes. The default settings
-(up to 16 nodes, `--trees 10`) take about 3 hours. Trees are generated
+(up to 16 nodes, `--trees 10`) take about 15 hours. Trees are generated
 smallest first, so a run stopped early still has complete results for the
 smaller sizes. The last tree of a stopped run may have fewer rows than the
 others, so drop it before analysing.
@@ -161,10 +164,10 @@ others, so drop it before analysing.
 ```json
 {
     "functions": {
-        "f": { "cost": [10, 10, 0], "children": ["g", "s"] },
-        "g": { "cost": [50, 50],    "children": ["h"] },
-        "s": { "cost": [20],        "children": [] },
-        "h": { "cost": [50],        "children": [] }
+        "f": { "cost": [10, 10, 0], "snapshot": 0,  "children": ["g", "s"] },
+        "g": { "cost": [50, 50],    "snapshot": 10, "children": ["h"] },
+        "s": { "cost": [20],        "snapshot": 5,  "children": [] },
+        "h": { "cost": [50],        "snapshot": 5,  "children": [] }
     },
     "limits": {
         "memory": 120,
@@ -178,6 +181,9 @@ others, so drop it before analysing.
 - `cost` is the work done between calls, so it has one more entry than
   `children`: the work before the first call, between calls, and after the
   last call.
+- `snapshot` is the memory needed to store the function's inputs when it is
+  checkpointed. Saving and loading it each cost this much work too. It is
+  optional and defaults to 0. The dp mode ignores it.
 - The functions must form a tree with exactly one root (a function nobody
   calls). The root is never checkpointed. A function may be called from only
   one place.
@@ -197,9 +203,8 @@ and the backward pass on the right.
 
 ## Costs
 
-- **Operation cost**: the cost of the whole program plus one re-run of each checkpointed function.
-- **Memory cost**: the maximum amount of memory used at any point in time. This includes any regrow phase due to checkpointing.
-- **Note**: the operation and memory costs of loading and saving input or outputs during checkpointing are not considered.
+- **Operation cost**: the cost of the whole program plus, for each checkpointed function, one re-run and saving and loading its snapshot (`2 * snapshot`).
+- **Memory cost**: the maximum amount of memory used at any point in time. This includes any regrow phase due to checkpointing, and the snapshot held for each checkpointed function in place of its tape.
 
 ## Project layout
 

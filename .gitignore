@@ -3,3 +3,4 @@ __pycache__/
 .venv/
 .vscode/
 analysis/learn_analysis.ipynb
+*.csv
