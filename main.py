@@ -28,10 +28,12 @@ if __name__ == "__main__":
     argParser.add_argument("-m", "--mode", choices=list(MODES), default="enumerate",
                            help="enumerate: every combination of checkpoints; "
                                 "heuristic: the result of each heuristic under the memory limit; "
+                                "profile: the result of each profiling strategy under the memory limit; "
                                 "dp: the dynamic programming schedule for the number of checkpoints in the input "
                                 "(evolution programs only); "
-                                "random: one random tree, its optimum and every heuristic (ignores --input); "
-                                "experiment: generate random trees, compare the heuristics with the optimum "
+                                "random: one random tree, its optimum, every heuristic and every "
+                                "profiling strategy (ignores --input); "
+                                "experiment: generate random trees, compare the strategies with the optimum "
                                 "and write a CSV (needs numpy, ignores --input) "
                                 "(default: %(default)s)")
     argParser.add_argument("-i", "--input", default="input.json",

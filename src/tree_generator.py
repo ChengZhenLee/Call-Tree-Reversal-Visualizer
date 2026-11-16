@@ -2,9 +2,19 @@ import csv
 import itertools
 import math
 import random
+from functools import partial
 from .brute_force import brute_force, find_optimum
 from .heuristics import HEURISTICS, run_heuristic
+from .profiling import STRATEGIES as PROFILING_STRATEGIES, run_profile
 from .classes import funcNode
+
+# name -> function taking (nodes, root, maxMem) and returning
+# (feasible, memory, operation cost, combination), for every heuristic and
+# every profiling strategy
+STRATEGIES = {
+    **{name: partial(run_heuristic, heuristic) for name, heuristic in HEURISTICS.items()},
+    **{name: partial(run_profile, strategy) for name, strategy in PROFILING_STRATEGIES.items()},
+}
 
 
 DEPTH_RANGE = (-5.0, 3.0)
@@ -90,14 +100,14 @@ CSV_COLUMNS = [
     "minMemory", "maxMemory", "alpha", "memoryLimit",
     # optimum
     "optimumMemory", "optimumCost", "optimumCheckpoints",
-    # heuristic
-    "heuristic", "feasible", "memory", "cost", "checkpoints", "costRatio", "isOptimal",
+    # strategy (a heuristic or a profiling strategy)
+    "strategy", "feasible", "memory", "cost", "checkpoints", "costRatio", "isOptimal",
 ]
 
 
 # Generate a tree for every combination of settings, find the optimum by brute
-# force and run every heuristic, for each alpha. Writes one CSV row per
-# (tree, alpha, heuristic)
+# force and run every heuristic and profiling strategy, for each alpha. Writes
+# one CSV row per (tree, alpha, strategy)
 def generate_random_trees(outputName="results.csv", treesPerSetting=10):
     # Imported here so the random mode runs without numpy
     import numpy as np
@@ -156,16 +166,15 @@ def generate_random_trees(outputName="results.csv", treesPerSetting=10):
                     limit = round(minMem + alpha * (maxMem - minMem))
                     optMemory, optCost, optCombination = find_optimum(results, limit)
 
-                    for name, heuristic in HEURISTICS.items():
-                        feasible, memory, cost, combination = run_heuristic(
-                            heuristic, checkpointable, root, limit)
+                    for name, run in STRATEGIES.items():
+                        feasible, memory, cost, combination = run(checkpointable, root, limit)
 
                         writer.writerow({
                             **treeRow,
                             "alpha": alpha, "memoryLimit": limit,
                             "optimumMemory": optMemory, "optimumCost": optCost,
                             "optimumCheckpoints": checkpointed_names(checkpointable, optCombination),
-                            "heuristic": name, "feasible": feasible,
+                            "strategy": name, "feasible": feasible,
                             "memory": memory, "cost": cost,
                             "checkpoints": checkpointed_names(checkpointable, combination),
                             "costRatio": cost / optCost if feasible else "",

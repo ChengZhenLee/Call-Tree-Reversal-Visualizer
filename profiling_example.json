@@ -1,0 +1,32 @@
+{
+    "functions": {
+        "f": {
+            "cost": [10, 10, 0],
+            "snapshot": 0,
+            "children": ["g", "s"]
+        },
+
+        "g": {
+            "cost": [50, 50],
+            "snapshot": 10,
+            "children": ["h"]
+        }, 
+
+        "h": {
+            "cost": [50],
+            "snapshot": 5,
+            "children": []
+        },
+
+        "s": {
+            "cost": [20],
+            "snapshot": 5,
+            "children": []
+        }
+    },
+
+    "limits": {
+        "memory": 160,
+        "checkpoints": 3
+    }
+}
