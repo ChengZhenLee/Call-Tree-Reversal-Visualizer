@@ -105,80 +105,98 @@ CSV_COLUMNS = [
 ]
 
 
-# Generate a tree for every combination of settings, find the optimum by brute
-# force and run every heuristic and profiling strategy, for each alpha. Writes
-# one CSV row per (tree, alpha, strategy)
-def generate_random_trees(outputName="results.csv", treesPerSetting=10):
+# Generate one tree, find its optimum by brute force and run every heuristic
+# and profiling strategy, for each alpha. Returns the CSV rows for that tree.
+# Top level so worker processes can run it
+def experiment_rows(settings):
+    n, seed, depthSetting, widthSetting, maxChildren, maxSegmentCost, maxSnapshotCost = settings
+
+    rng = random.Random(seed)
+    root, nodes = generate_tree(
+        n,
+        depthBias=scale_bias(depthSetting, DEPTH_RANGE),
+        widthBias=scale_bias(widthSetting, WIDTH_RANGE),
+        maxChildren=maxChildren,
+        maxSegmentCost=maxSegmentCost,
+        maxSnapshotCost=maxSnapshotCost,
+        rng=rng,
+    )
+
+    # The root is never checkpointed. generate_tree puts it first
+    checkpointable = nodes[1:]
+
+    # Brute force once per tree, then reuse the results for every alpha
+    minMem, maxMem, results = brute_force(checkpointable, root)
+
+    treeRow = {
+        "seed": seed, "nodes": n,
+        "depthSetting": depthSetting, "widthSetting": widthSetting,
+        "maxChildren": "none" if maxChildren is None else maxChildren,
+        "maxSegmentCost": maxSegmentCost,
+        "maxSnapshotCost": maxSnapshotCost,
+        **measure_tree(root, nodes),
+        "minMemory": minMem, "maxMemory": maxMem,
+    }
+
+    rows = []
+    for alpha in ALPHAS:
+        # The limit is never below minMem, so the optimum always exists
+        limit = round(minMem + alpha * (maxMem - minMem))
+        optMemory, optCost, optCombination = find_optimum(results, limit)
+
+        for name, run in STRATEGIES.items():
+            feasible, memory, cost, combination = run(checkpointable, root, limit)
+
+            rows.append({
+                **treeRow,
+                "alpha": alpha, "memoryLimit": limit,
+                "optimumMemory": optMemory, "optimumCost": optCost,
+                "optimumCheckpoints": checkpointed_names(checkpointable, optCombination),
+                "strategy": name, "feasible": feasible,
+                "memory": memory, "cost": cost,
+                "checkpoints": checkpointed_names(checkpointable, combination),
+                "costRatio": cost / optCost if feasible else "",
+                "isOptimal": feasible and cost == optCost,
+            })
+
+    return rows
+
+
+# Generate a tree for every combination of settings and write one CSV row per
+# (tree, alpha, strategy). jobs is the number of worker processes (None: one
+# per core, 1: run in this process). The rows come out in the same order
+# whatever the number of jobs
+def generate_random_trees(outputName="results.csv", treesPerSetting=10, jobs=None):
     # Imported here so the random mode runs without numpy
     import numpy as np
 
-    depthSettings = np.linspace(-1, 1, 5)
-    widthSettings = np.linspace(-1, 1, 5)
+    # Plain floats, so the CSV and the workers get the same values as before
+    depthSettings = [float(x) for x in np.linspace(-1, 1, 5)]
+    widthSettings = [float(x) for x in np.linspace(-1, 1, 5)]
 
-    total = (treesPerSetting * len(depthSettings) * len(widthSettings)
-             * len(NODE_COUNTS) * len(CHILD_LIMITS) * len(MAX_SEGMENT_COSTS)
-             * len(MAX_SNAPSHOT_COSTS))
-    done = 0
+    # Smallest trees first, so a run stopped early still has complete
+    # results for the smaller sizes
+    tasks = [(n, *rest) for n in NODE_COUNTS
+             for rest in itertools.product(
+                 range(treesPerSetting), depthSettings, widthSettings, CHILD_LIMITS,
+                 MAX_SEGMENT_COSTS, MAX_SNAPSHOT_COSTS)]
+    total = len(tasks)
 
     with open(outputName, "w", newline="") as outFile:
         writer = csv.DictWriter(outFile, fieldnames=CSV_COLUMNS)
         writer.writeheader()
 
-        # Smallest trees first, so a run stopped early still has complete
-        # results for the smaller sizes
-        for n in NODE_COUNTS:
-            for (seed, depthSetting, widthSetting, maxChildren, maxSegmentCost,
-                 maxSnapshotCost) in itertools.product(
-                    range(treesPerSetting), depthSettings, widthSettings, CHILD_LIMITS,
-                    MAX_SEGMENT_COSTS, MAX_SNAPSHOT_COSTS):
-                done += 1
+        def write_all(rowLists):
+            for done, rows in enumerate(rowLists, 1):
+                writer.writerows(rows)
                 print(f"\rTree {done}/{total}", end="", flush=True)
 
-                rng = random.Random(seed)
-                root, nodes = generate_tree(
-                    n,
-                    depthBias=scale_bias(depthSetting, DEPTH_RANGE),
-                    widthBias=scale_bias(widthSetting, WIDTH_RANGE),
-                    maxChildren=maxChildren,
-                    maxSegmentCost=maxSegmentCost,
-                    maxSnapshotCost=maxSnapshotCost,
-                    rng=rng,
-                )
+        if jobs == 1:
+            write_all(map(experiment_rows, tasks))
+        else:
+            from multiprocessing import Pool
+            with Pool(jobs) as pool:
+                # Small chunks keep the large trees at the end spread over the workers
+                write_all(pool.imap(experiment_rows, tasks, chunksize=4))
 
-                # The root is never checkpointed. generate_tree puts it first
-                checkpointable = nodes[1:]
-
-                # Brute force once per tree, then reuse the results for every alpha
-                minMem, maxMem, results = brute_force(checkpointable, root)
-
-                treeRow = {
-                    "seed": seed, "nodes": n,
-                    "depthSetting": depthSetting, "widthSetting": widthSetting,
-                    "maxChildren": "none" if maxChildren is None else maxChildren,
-                    "maxSegmentCost": maxSegmentCost,
-                    "maxSnapshotCost": maxSnapshotCost,
-                    **measure_tree(root, nodes),
-                    "minMemory": minMem, "maxMemory": maxMem,
-                }
-
-                for alpha in ALPHAS:
-                    # The limit is never below minMem, so the optimum always exists
-                    limit = round(minMem + alpha * (maxMem - minMem))
-                    optMemory, optCost, optCombination = find_optimum(results, limit)
-
-                    for name, run in STRATEGIES.items():
-                        feasible, memory, cost, combination = run(checkpointable, root, limit)
-
-                        writer.writerow({
-                            **treeRow,
-                            "alpha": alpha, "memoryLimit": limit,
-                            "optimumMemory": optMemory, "optimumCost": optCost,
-                            "optimumCheckpoints": checkpointed_names(checkpointable, optCombination),
-                            "strategy": name, "feasible": feasible,
-                            "memory": memory, "cost": cost,
-                            "checkpoints": checkpointed_names(checkpointable, combination),
-                            "costRatio": cost / optCost if feasible else "",
-                            "isOptimal": feasible and cost == optCost,
-                        })
-
-    print("Results generated")
+    print("\nResults generated")

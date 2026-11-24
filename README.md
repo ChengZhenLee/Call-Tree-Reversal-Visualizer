@@ -41,6 +41,7 @@ Options (also accepted by the launchers):
 | `-i`, `--input` | input json file (not used by `random` or `experiment`) | `input.json` |
 | `-o`, `--output` | output file | `output.tex`, or `results.csv` for `experiment` |
 | `-t`, `--trees` | `experiment` only: trees per combination of settings | `10` |
+| `-j`, `--jobs` | `experiment` only: worker processes to spread the trees over; `1` runs in a single process | one per CPU core |
 
 Random mode also takes `--nodes`, `--depth`, `--width`, `--max-children`,
 `--max-segment-cost`, `--seed` and `--alpha` (see Random mode below).
@@ -173,7 +174,10 @@ optimum. A tree can be rebuilt from its `seed` and settings.
 
 Trying every combination doubles in time with each extra node: about 1 to 2 s
 for a 16-node tree, and roughly 15 s or more at 20 nodes. The default settings
-(up to 16 nodes, `--trees 10`) take about 15 hours. Trees are generated
+(up to 16 nodes, `--trees 10`) take about 15 hours on one core. The trees
+are spread over all CPU cores by default (`--jobs` sets how many), which
+divides that time by roughly the number of cores; the CSV is the same
+whatever the number of jobs. Trees are generated
 smallest first, so a run stopped early still has complete results for the
 smaller sizes. The last tree of a stopped run may have fewer rows than the
 others, so drop it before analysing.

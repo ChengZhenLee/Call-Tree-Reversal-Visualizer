@@ -5,6 +5,7 @@ from src.modes import MODES
 # Settings used by the random and experiment modes, and their defaults
 DEFAULT_OPTIONS = {
     "trees": 10,
+    "jobs": None,
     "nodes": 8,
     "depth": 0.0,
     "width": 0.0,
@@ -66,6 +67,8 @@ if __name__ == "__main__":
     experimentArgs = argParser.add_argument_group("experiment mode")
     experimentArgs.add_argument("-t", "--trees", type=int, default=DEFAULT_OPTIONS["trees"],
                                 help="trees (seeds) per combination of settings (default: %(default)s)")
+    experimentArgs.add_argument("-j", "--jobs", type=int, default=DEFAULT_OPTIONS["jobs"],
+                                help="worker processes, 1 runs without any (default: one per CPU core)")
     args = argParser.parse_args()
 
     output = args.output or ("results.csv" if args.mode == "experiment" else "output.tex")

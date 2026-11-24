@@ -192,7 +192,7 @@ def run_random(inputName, outputName, options):
 # Ignores the input file. Imported here so the other modes run without numpy
 def run_experiment(inputName, outputName, options):
     from .tree_generator import generate_random_trees
-    generate_random_trees(outputName, options["trees"])
+    generate_random_trees(outputName, options["trees"], options["jobs"])
 
 
 # Every mode takes (inputName, outputName, options), where options holds the
